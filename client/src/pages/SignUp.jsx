@@ -1,3 +1,3 @@
 export default function SignUp() {
-  return <div>in</div>;
+  return <div>SignUp</div>;
 }
