@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  signInstart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice";
+
 export default function SignIn() {
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -15,7 +22,7 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
-      setLoading(true);
+      dispatch(signInstart());
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
@@ -25,16 +32,13 @@ export default function SignIn() {
       });
       const data = await res.json();
       if (data.success === false) {
-        setError(data.message);
-        setLoading(false);
+        dispatch(signInFailure(error.message));
         return;
       }
-      setLoading(false);
-      setError(null);
+      dispatch(signInSuccess());
       navigate("/");
     } catch (error) {
-      setLoading(false);
-      setError(error.message);
+      dispatch(signInFailure(error.message));
     }
   };
 
@@ -65,12 +69,14 @@ export default function SignIn() {
           {loading ? "Loading..." : "Sign In"}
         </button>
       </form>
-      <div className="flex max-sm:block gap-2 mt-5">
-        <p>Do not have an account?</p>
-        <Link to={"/sign-in"}>
-          <span className="text-blue-700">Sign Up</span>
-        </Link>
-        {error && <p className="text-rose-500 mt-5">{error}</p>}
+      <div className="flex flex-col gap-2 mt-5">
+        <div className="flex">
+          <p>Do not have an account?</p>
+          <Link to={"/sign-up"}>
+            <span className="text-blue-700">Sign Up</span>
+          </Link>
+        </div>
+        {error && <p className="text-rose-500 mt-5 ">{error}</p>}
       </div>
     </div>
   );
